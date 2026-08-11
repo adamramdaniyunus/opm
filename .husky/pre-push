@@ -17,4 +17,6 @@ if (process.versions.bun !== expectedBunVersion) {
   console.warn(`Warning: Bun version ${process.versions.bun} differs from expected ${expectedBunVersion}`);
 }
 '
-bun typecheck
+
+# Full-workspace typecheck is ~7 minutes and turns every push into a wait.
+# Run `bun typecheck` yourself before opening a PR.
