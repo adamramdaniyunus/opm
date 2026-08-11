@@ -1,4 +1,4 @@
-export * as OpenCode from "./opencode"
+export * as OPM from "./opencode"
 export * as Tool from "./tool"
 
 export { ClientError } from "@opencode-ai/client/effect"
@@ -14,4 +14,4 @@ export {
   SessionInput,
   SessionMessage,
 } from "@opencode-ai/client/effect"
-export type { OpenCodeEvent } from "@opencode-ai/client/effect"
+export type { OPMEvent } from "@opencode-ai/client/effect"
