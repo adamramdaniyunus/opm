@@ -54,6 +54,10 @@ export class Service extends ConfigService.Service<Service>()("@opencode/Runtime
   experimentalNativeLlm: bool("OPENCODE_EXPERIMENTAL_NATIVE_LLM"),
   experimentalWebSockets: bool("OPENCODE_EXPERIMENTAL_WEBSOCKETS"),
   client: Config.string("OPENCODE_CLIENT").pipe(Config.withDefault("cli")),
+  // Origin to proxy the web UI from when no bundle is embedded in the binary.
+  // Point this at the Vite dev server (`bun run dev:web`) to develop the UI
+  // against a locally running server. Unset means "no UI available".
+  webUiOrigin: Config.string("OPENCODE_WEB_UI_ORIGIN").pipe(Config.option, Config.map(Option.getOrUndefined)),
 }) {}
 
 export type Info = Context.Service.Shape<typeof Service>

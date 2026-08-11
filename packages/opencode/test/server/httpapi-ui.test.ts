@@ -91,6 +91,7 @@ function uiApp(input?: {
   username?: string
   client?: Layer.Layer<HttpClient.HttpClient>
   disableEmbeddedWebUi?: boolean
+  webUiOrigin?: string
 }) {
   const handler = HttpRouter.toWebHandler(
     HttpRouter.use((router) =>
@@ -99,7 +100,12 @@ function uiApp(input?: {
         const client = yield* HttpClient.HttpClient
         const flags = yield* RuntimeFlags.Service
         yield* router.add("*", "/*", (request) =>
-          serveUIEffect(request, { fs, client, disableEmbeddedWebUi: flags.disableEmbeddedWebUi }),
+          serveUIEffect(request, {
+            fs,
+            client,
+            disableEmbeddedWebUi: flags.disableEmbeddedWebUi,
+            webUiOrigin: flags.webUiOrigin,
+          }),
         )
       }),
     ).pipe(
@@ -107,7 +113,11 @@ function uiApp(input?: {
       Layer.provide([
         fsUtilLayer,
         input?.client ?? httpClient(new Response("ui")),
-        RuntimeFlags.layer({ disableEmbeddedWebUi: input?.disableEmbeddedWebUi ?? false }),
+        RuntimeFlags.layer({
+          disableEmbeddedWebUi: input?.disableEmbeddedWebUi ?? false,
+          // Presence, not truthiness: `webUiOrigin: undefined` means "no UI configured".
+          webUiOrigin: input && "webUiOrigin" in input ? input.webUiOrigin : WEB_UI_ORIGIN,
+        }),
         HttpServer.layerServices,
       ]),
     ),
@@ -139,13 +149,18 @@ function routeOrderingApp() {
           Effect.succeed(HttpServerResponse.jsonUnsafe({ error: "Not Found" }, { status: 404 })),
         )
         yield* router.add("*", "/*", (request) =>
-          serveUIEffect(request, { fs, client, disableEmbeddedWebUi: flags.disableEmbeddedWebUi }),
+          serveUIEffect(request, {
+            fs,
+            client,
+            disableEmbeddedWebUi: flags.disableEmbeddedWebUi,
+            webUiOrigin: flags.webUiOrigin,
+          }),
         )
       }),
     ).pipe(
       Layer.provide([
         fsUtilLayer,
-        RuntimeFlags.layer({ disableEmbeddedWebUi: true }),
+        RuntimeFlags.layer({ disableEmbeddedWebUi: true, webUiOrigin: WEB_UI_ORIGIN }),
         httpClient(new Response("ui"), (request) => {
           proxiedUrl = request.url
         }),
@@ -179,6 +194,8 @@ function httpClient(response: Response, onRequest?: (request: HttpClientRequest.
   )
 }
 
+const WEB_UI_ORIGIN = "http://ui.test"
+
 function responseText(response: Response) {
   return Effect.promise(() => response.text())
 }
@@ -201,7 +218,24 @@ describe("HttpApi UI fallback", () => {
       expect(response.status).toBe(200)
       expect(response.headers.get("content-type")).toContain("text/html")
       expect(yield* responseText(response)).toBe("<html>opencode</html>")
-      expect(proxiedUrl).toBe("https://app.opencode.ai/")
+      expect(proxiedUrl).toBe(`${WEB_UI_ORIGIN}/`)
+    }),
+  )
+
+  it.live("refuses to serve a UI when nothing is embedded and no origin is configured", () =>
+    Effect.gen(function* () {
+      let proxied = false
+
+      const response = yield* uiApp({
+        disableEmbeddedWebUi: true,
+        webUiOrigin: undefined,
+        client: httpClient(new Response("ui"), () => {
+          proxied = true
+        }),
+      }).request("/")
+
+      expect(response.status).toBe(503)
+      expect(proxied).toBe(false)
     }),
   )
 
@@ -217,11 +251,12 @@ describe("HttpApi UI fallback", () => {
           fs,
           client,
           disableEmbeddedWebUi: flags.disableEmbeddedWebUi,
+          webUiOrigin: flags.webUiOrigin,
         })
       }).pipe(
         Effect.provide(
           Layer.mergeAll(
-            RuntimeFlags.layer({ disableEmbeddedWebUi: true }),
+            RuntimeFlags.layer({ disableEmbeddedWebUi: true, webUiOrigin: WEB_UI_ORIGIN }),
             Layer.succeed(
               HttpClient.HttpClient,
               HttpClient.make((request) => {
@@ -246,7 +281,7 @@ describe("HttpApi UI fallback", () => {
       )
 
       expect(response.status).toBe(200)
-      expect(proxiedUrl).toBe("https://app.opencode.ai/assets/app.js")
+      expect(proxiedUrl).toBe(`${WEB_UI_ORIGIN}/assets/app.js`)
       expect(response.headers.get("content-encoding")).toBeNull()
       expect(response.headers.get("content-length")).not.toBe("999")
       expect(response.headers.get("content-type")).toContain("text/javascript")
@@ -267,11 +302,12 @@ describe("HttpApi UI fallback", () => {
           fs,
           client,
           disableEmbeddedWebUi: flags.disableEmbeddedWebUi,
+          webUiOrigin: flags.webUiOrigin,
         })
       }).pipe(
         Effect.provide(
           Layer.mergeAll(
-            RuntimeFlags.layer({ disableEmbeddedWebUi: true }),
+            RuntimeFlags.layer({ disableEmbeddedWebUi: true, webUiOrigin: WEB_UI_ORIGIN }),
             Layer.succeed(
               HttpClient.HttpClient,
               HttpClient.make((request) =>

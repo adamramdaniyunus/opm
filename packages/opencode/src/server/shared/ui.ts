@@ -6,8 +6,6 @@ import { ProxyUtil } from "../proxy-util"
 
 let embeddedUIPromise: Promise<Record<string, string> | null> | undefined
 
-export const UI_UPSTREAM = new URL("https://app.opencode.ai")
-
 export const csp = (hash = "") =>
   `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'${hash ? ` 'sha256-${hash}'` : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; media-src 'self' data:; connect-src * data: blob:`
 export const DEFAULT_CSP = csp()
@@ -37,8 +35,8 @@ function proxyResponseHeaders(headers: Record<string, string>) {
   return result
 }
 
-export function upstreamURL(path: string) {
-  return new URL(path, UI_UPSTREAM).toString()
+export function webUiURL(path: string, origin: string) {
+  return new URL(path, origin).toString()
 }
 
 export function embeddedUI(disableEmbeddedWebUi: boolean) {
@@ -75,9 +73,25 @@ export function serveEmbeddedUIEffect(
   )
 }
 
+function uiUnavailable() {
+  return HttpServerResponse.jsonUnsafe(
+    {
+      error: "Web UI not available",
+      detail:
+        "No UI bundle is embedded in this build. Start the UI with `bun run dev:web` and use `bun run dev:full`, or build the UI into the binary.",
+    },
+    { status: 503 },
+  )
+}
+
 export function serveUIEffect(
   request: HttpServerRequest.HttpServerRequest,
-  services: { fs: FSUtil.Interface; client: HttpClient.HttpClient; disableEmbeddedWebUi: boolean },
+  services: {
+    fs: FSUtil.Interface
+    client: HttpClient.HttpClient
+    disableEmbeddedWebUi: boolean
+    webUiOrigin?: string | undefined
+  },
 ) {
   return Effect.gen(function* () {
     const embeddedWebUI = yield* Effect.promise(() => embeddedUI(services.disableEmbeddedWebUi))
@@ -85,9 +99,15 @@ export function serveUIEffect(
 
     if (embeddedWebUI) return yield* serveEmbeddedUIEffect(path, services.fs, embeddedWebUI)
 
+    // Nothing embedded: only serve a UI the operator explicitly pointed us at.
+    // This deliberately does not fall back to a hosted origin — a fork must not
+    // silently serve somebody else's app against its own backend.
+    const origin = services.webUiOrigin
+    if (!origin) return uiUnavailable()
+
     const response = yield* services.client.execute(
-      HttpClientRequest.make(request.method)(upstreamURL(path), {
-        headers: ProxyUtil.headers(request.headers, { host: UI_UPSTREAM.host }),
+      HttpClientRequest.make(request.method)(webUiURL(path, origin), {
+        headers: ProxyUtil.headers(request.headers, { host: new URL(origin).host }),
         body: requestBody(request),
       }),
     )

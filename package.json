@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "opencode",
+  "name": "opm",
   "description": "AI-powered development tool",
   "private": true,
   "type": "module",
@@ -9,7 +9,8 @@
     "dev": "bun run --cwd packages/opencode --conditions=browser src/index.ts",
     "dev:watch": "bun run --watch --cwd packages/opencode --conditions=browser src/index.ts",
     "dev:desktop": "bun --cwd packages/desktop dev",
-    "dev:web": "bun --cwd packages/app dev",
+    "dev:web": "bun --cwd packages/app dev -- --port 5173 --strictPort",
+    "dev:full": "OPENCODE_WEB_UI_ORIGIN=http://localhost:5173 bun run dev",
     "lint": "oxlint",
     "typecheck": "bun turbo typecheck",
     "upgrade-opentui": "bun run script/upgrade-opentui.ts",
