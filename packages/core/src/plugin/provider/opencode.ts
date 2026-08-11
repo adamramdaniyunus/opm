@@ -1,8 +1,8 @@
 import { Duration, Effect, Schema, Semaphore, Stream } from "effect"
 import type { Scope } from "effect"
-import type { IntegrationOAuthMethodRegistration } from "@opencode-ai/plugin/v2/effect/integration"
-import { define } from "@opencode-ai/plugin/v2/effect/plugin"
-import type { CredentialValue } from "@opencode-ai/sdk/v2/types"
+import type { IntegrationOAuthMethodRegistration } from "@opm/plugin/v2/effect/integration"
+import { define } from "@opm/plugin/v2/effect/plugin"
+import type { CredentialValue } from "@opm/sdk/v2/types"
 import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstable/http"
 import { EventV2 } from "../../event"
 import { Credential } from "../../credential"
@@ -40,7 +40,7 @@ function oauth(http: HttpClient.HttpClient) {
     method: {
       id: methodID,
       type: "oauth",
-      label: "OpenCode Console account",
+      label: "OPM Console account",
     },
     authorize: () =>
       Effect.gen(function* () {
@@ -92,7 +92,7 @@ export const OpencodePlugin = define<HttpClient.HttpClient | EventV2.Service | S
       providers = credential
         ? yield* fetchProviders(http, credential).pipe(
             Effect.catch((cause) =>
-              Effect.logWarning("failed to load OpenCode provider config", { cause }).pipe(Effect.as(undefined)),
+              Effect.logWarning("failed to load OPM provider config", { cause }).pipe(Effect.as(undefined)),
             ),
           )
         : undefined
@@ -100,7 +100,7 @@ export const OpencodePlugin = define<HttpClient.HttpClient | EventV2.Service | S
 
     yield* ctx.integration.transform((draft) => {
       draft.update("opencode", (integration) => {
-        integration.name = "OpenCode"
+        integration.name = "OPM"
       })
       draft.method.update(oauth(http))
       draft.method.update({ integrationID: "opencode", method: { type: "key", label: "API key (service account)" } })
