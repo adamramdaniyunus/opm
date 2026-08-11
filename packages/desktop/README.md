@@ -1,6 +1,6 @@
-# OpenCode Desktop
+# OPM Desktop
 
-The OpenCode Desktop app, built with Electron.
+The OPM Desktop app, built with Electron.
 
 ## Development
 

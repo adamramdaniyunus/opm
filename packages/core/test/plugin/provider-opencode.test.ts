@@ -1,14 +1,14 @@
 import { describe, expect } from "bun:test"
 import { Effect } from "effect"
-import { Catalog } from "@opencode-ai/core/catalog"
-import { Credential } from "@opencode-ai/core/credential"
-import { EventV2 } from "@opencode-ai/core/event"
-import { Integration } from "@opencode-ai/core/integration"
-import { ModelV2 } from "@opencode-ai/core/model"
-import { PluginV2 } from "@opencode-ai/core/plugin"
-import { PluginHost } from "@opencode-ai/core/plugin/host"
-import { OpencodePlugin } from "@opencode-ai/core/plugin/provider/opencode"
-import { ProviderV2 } from "@opencode-ai/core/provider"
+import { Catalog } from "@opm/core/catalog"
+import { Credential } from "@opm/core/credential"
+import { EventV2 } from "@opm/core/event"
+import { Integration } from "@opm/core/integration"
+import { ModelV2 } from "@opm/core/model"
+import { PluginV2 } from "@opm/core/plugin"
+import { PluginHost } from "@opm/core/plugin/host"
+import { OpencodePlugin } from "@opm/core/plugin/provider/opencode"
+import { ProviderV2 } from "@opm/core/provider"
 import { testEffect } from "../lib/effect"
 import { PluginTestLayer } from "./fixture"
 
@@ -75,14 +75,14 @@ describe("OpencodePlugin", () => {
         {
           id: Integration.MethodID.make("device"),
           type: "oauth",
-          label: "OpenCode Console account",
+          label: "OPM Console account",
         },
         { type: "key", label: "API key (service account)" },
       ])
     }),
   )
 
-  it.live("loads providers and models from the connected OpenCode server", () =>
+  it.live("loads providers and models from the connected OPM server", () =>
     Effect.acquireUseRelease(
       Effect.sync(() => {
         const authorization: Array<string | null> = []
