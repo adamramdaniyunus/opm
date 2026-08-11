@@ -23,6 +23,20 @@ Rules:
 
 Reading test files, searching them, or writing/editing tests is fine — the restriction is on *executing* these commands.
 
+## Do Not Commit Unless Asked
+
+Do **not** create commits, amend commits, or push on your own initiative. Leave finished work in the working tree and let the user review it first.
+
+This includes: `git commit` (including `--amend`), `git push`, `git merge`, `git rebase`, `git reset --hard`, `git checkout`/`git switch` to another branch, `git stash`, and `gh pr create`.
+
+Rules:
+
+1. Commit or push **only** when the user explicitly asks in the current turn (e.g. "commit ini", "push ke branch X"). That authorizes that one action, not every later change in the session.
+2. Never chain an unasked commit onto an edit task. Finishing the code is the deliverable; committing is a separate request.
+3. After editing, summarize what changed and which files are affected so the user can review and commit themselves.
+4. Read-only git commands are always fine: `git status`, `git diff`, `git log`, `git show`, `git branch --list`.
+5. When a commit *is* requested, follow the AGENTS.md conventions: `type(scope): summary`, and branch from `dev` rather than committing onto it directly.
+
 ## When You Are Asked To Run Them
 
 - Tests cannot run from the repo root (guard: `do-not-run-tests-from-root`). Run from a package directory such as `packages/opencode`.
