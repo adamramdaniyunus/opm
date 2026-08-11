@@ -15,7 +15,6 @@ import { Env } from "@/env"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { Format } from "@/format"
 import { Git } from "@/git"
-import { Installation } from "@/installation"
 import { LSP } from "@/lsp/lsp"
 import { MCP } from "@/mcp"
 import { McpAuth } from "@/mcp/auth"
@@ -98,7 +97,6 @@ import { ptyConnectHandlers, ptyHandlers } from "./handlers/pty"
 import { questionHandlers } from "./handlers/question"
 import { sessionHandlers } from "./handlers/session"
 import { syncHandlers } from "./handlers/sync"
-import { tuiHandlers } from "./handlers/tui"
 import { handlers } from "@opencode-ai/server/handlers"
 import { buildLocationServiceMap, LocationServiceMap } from "@opencode-ai/core/location-services"
 import { layer as locationLayer } from "@opencode-ai/server/location"
@@ -166,7 +164,6 @@ const instanceApiRoutes = HttpApiBuilder.layer(InstanceHttpApi).pipe(
     providerHandlers,
     sessionHandlers,
     syncHandlers,
-    tuiHandlers,
     workspaceHandlers,
   ]),
 )
@@ -257,7 +254,6 @@ const app = LayerNode.group([
   Vcs.node,
   Workspace.node,
   Worktree.node,
-  Installation.node,
   ShareNext.node,
   SessionShare.node,
   InstanceStore.node,
