@@ -29,8 +29,7 @@ function getNetworkIPs() {
 }
 
 export const WebCommand = effectCmd({
-  // Default command: the editor UI is the app, so a bare invocation opens it.
-  command: ["$0", "web"],
+  command: "web",
   builder: (yargs) => withNetworkOptions(yargs),
   describe: "start opm server and open web interface",
   // Server loads instances per-request via x-opencode-directory header — no

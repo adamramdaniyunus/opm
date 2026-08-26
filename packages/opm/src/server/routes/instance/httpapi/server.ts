@@ -97,6 +97,7 @@ import { ptyConnectHandlers, ptyHandlers } from "./handlers/pty"
 import { questionHandlers } from "./handlers/question"
 import { sessionHandlers } from "./handlers/session"
 import { syncHandlers } from "./handlers/sync"
+import { tuiHandlers } from "./handlers/tui"
 import { handlers } from "@opm/server/handlers"
 import { buildLocationServiceMap, LocationServiceMap } from "@opm/core/location-services"
 import { layer as locationLayer } from "@opm/server/location"
@@ -164,6 +165,7 @@ const instanceApiRoutes = HttpApiBuilder.layer(InstanceHttpApi).pipe(
     providerHandlers,
     sessionHandlers,
     syncHandlers,
+    tuiHandlers,
     workspaceHandlers,
   ]),
 )

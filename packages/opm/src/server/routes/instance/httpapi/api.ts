@@ -28,6 +28,7 @@ import { makeApi } from "@opm/protocol/api"
 import { LocationMiddleware } from "@opm/server/location"
 import { SessionLocationMiddleware } from "@opm/server/middleware/session-location"
 import { GlobalApi } from "./groups/global"
+import { TuiApi } from "./groups/tui"
 import { Authorization } from "./middleware/authorization"
 import { SchemaErrorMiddleware } from "./middleware/schema-error"
 
@@ -71,6 +72,7 @@ export const InstanceHttpApi = HttpApi.make("opencode-instance")
   .addHttpApi(ProviderApi)
   .addHttpApi(SessionApi)
   .addHttpApi(SyncApi)
+  .addHttpApi(TuiApi)
   .addHttpApi(WorkspaceApi)
   .middleware(SchemaErrorMiddleware)
 
